@@ -1,0 +1,25 @@
+diff --git a/JumpGP_QD.py b/JumpGP_QD.py
+--- a/JumpGP_QD.py
++++ b/JumpGP_QD.py
+@@ -51,6 +51,9 @@ def JumpGP_QD(x, y, xt, mode, bVerbose=False, *args):
+         gx, _ = calculate_gx(px, w_d)
+         r = gx >= 0
+         r1 = r.flatten()
++        if not np.any(r1) or not np.any(~r1):
++            fd.append(np.inf)
++            continue
+         # directly use loglikelihood to sum
+         fd.append(
+             loglikelihood(logtheta, cv[0], cv[1], x[r1, :], y[r1]) +
+diff --git a/maximize_PD.py b/maximize_PD.py
+--- a/maximize_PD.py
++++ b/maximize_PD.py
+@@ -133,7 +133,9 @@ def maximize_PD(x, y, xt, px, pxt, w, logtheta, cv, bVerbose=False):
+         from scipy.optimize import LinearConstraint
+         # Create constraint matrix with correct dimensions
+         A = -np.array([1, *pxt[0]])  # Use only the first test point
+-        lc = LinearConstraint(A, ub=0)
++        # SciPy requires both bounds.  The upstream code supplied only the
++        # upper bound, which raises a TypeError in current SciPy releases.
++        lc = LinearConstraint(A, lb=-np.inf, ub=0)
+         w_new = minimize(wfun, w_flattened, constraints=lc, options={'disp': False}).x

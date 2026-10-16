@@ -1,0 +1,9 @@
+results/
+*.o
+*.so
+*.dll
+__pycache__/
+.DS_Store
+.Rhistory
+.RData
+*.rds
